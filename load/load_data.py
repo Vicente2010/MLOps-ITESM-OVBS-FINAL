@@ -23,7 +23,7 @@ class DataRetriever:
     ```
     """
 
-    DROP_COLS = ['name', 'ticket', 'boat', 'body', 'home.dest']
+    DROP_COLS = ['nameOrig', 'nameDest', 'isFlaggedFraud']
     # DATASETS_DIR = './data/'  # Directory where data will be saved.
     RETRIEVED_DATA = 'retrieved_data.csv'  # File name for the retrieved data.
 
@@ -79,13 +79,13 @@ class DataRetriever:
         data = pd.read_csv(self.url)
 
         # Uncovering missing data
-        data.replace('?', np.nan, inplace=True)
-        data['age'] = data['age'].astype('float')
-        data['fare'] = data['fare'].astype('float')
+        # data.replace('?', np.nan, inplace=True)
+        # data['age'] = data['age'].astype('float')
+        # data['fare'] = data['fare'].astype('float')
 
         # Extract the first cabin | Extract the title from 'name'
-        data['cabin'] = data['cabin'].apply(self._get_first_cabin)
-        data['title'] = data['name'].apply(self._get_title)
+        # data['cabin'] = data['cabin'].apply(self._get_first_cabin)
+        # data['title'] = data['name'].apply(self._get_title)
 
         # Drop irrelevant columns
         data.drop(self.DROP_COLS, axis=1, inplace=True)
