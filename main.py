@@ -8,13 +8,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
 # import os
 
-DATASETS_DIR = './data/'
-RETRIEVED_DATA = 'retrieved_data.csv'
-
 # Constants for the load process
 # The file is too big, in this version we use a local path instead of an URL
 # URL = "https://drive.google.com/file/d/1sU4a5BZsBBDT8wqSxCXa-KQcfjS6REIX/view?usp=sharing"
 FILE_PATH = "c:/Users/oscar.betanzos/Documents/Dataset/onlinefraud.csv"
+DATASETS_DIR = './data/'
+RETRIEVED_DATA = 'retrieved_data.csv'
 
 # Constants/Parameters for the train process
 SEED_MODEL = 404
@@ -56,6 +55,7 @@ logistic_regression_model = onlinefraud_data_pipeline.fit_logistic_regression(X_
 X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(X_test)
 y_pred = logistic_regression_model.predict(X_test)
 
+# Making predictions and measuring performance-
 class_pred = logistic_regression_model.predict(X_test)
 proba_pred = logistic_regression_model.predict_proba(X_test)[:, 1]
 print(f'test roc-auc : {roc_auc_score(y_test, proba_pred)}')
