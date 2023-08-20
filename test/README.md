@@ -2,7 +2,7 @@
 
 This is the documentation to perform test on this project fuctionalities
 
-## Testing wheather the dataset path contains the dataset 
+## Testing whether the dataset path contains the dataset 
 
 The following command test the load functionality that works in load module
 
