@@ -5,7 +5,7 @@ import pandas as pd
 import joblib
 from train.train_data import OnlineFraudPipeline
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 # import os
 
 # Constants for the load process
@@ -60,6 +60,10 @@ class_pred = logistic_regression_model.predict(X_test)
 proba_pred = logistic_regression_model.predict_proba(X_test)[:, 1]
 print(f'test roc-auc : {roc_auc_score(y_test, proba_pred)}')
 print(f'test accuracy: {accuracy_score(y_test, class_pred)}')
+
+# Displaying confusion matrix
+conf_mx = confusion_matrix(y_test, y_pred, labels=logistic_regression_model.classes_)
+print(conf_mx)
 
 # Save the model using joblib
 save_path = TRAINED_MODEL_DIR + PIPELINE_SAVE_FILE
