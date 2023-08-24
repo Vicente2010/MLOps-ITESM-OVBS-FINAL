@@ -6,6 +6,14 @@ from preprocess.preprocess_data import (
     OneHotEncoder,
     FeatureSelector,
 )
+from utilities.logging_util import LoggingSetter
+
+# SETTING THE LOGGER UTILITY
+# Using the logger utility for handling log setting and creation
+loggerSet = LoggingSetter(__name__)
+
+# All logs will be saved at utilities folder
+logger = loggerSet.setting_log('utilities/main.log')
 
 
 class OnlineFraudPipeline:
@@ -45,6 +53,7 @@ class OnlineFraudPipeline:
                                 ('scaling', MinMaxScaler()),
             ]
         )
+        logger.debug("Creating pipeline")
         return self.PIPELINE
 
     def fit_logistic_regression(self, X_train, y_train):
@@ -62,6 +71,7 @@ class OnlineFraudPipeline:
         pipeline = self.create_pipeline()
         pipeline.fit(X_train, y_train)
         logistic_regression.fit(pipeline.transform(X_train), y_train)
+        logger.debug("Training Logistic Regresion")
         return logistic_regression
 
     def transform_test_data(self, X_test):
