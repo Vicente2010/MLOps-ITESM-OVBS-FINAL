@@ -2,6 +2,15 @@ import pandas as pd
 # import numpy as np
 # import re
 import os
+from utilities.logging_util import LoggingSetter
+import requests
+
+# SETTING THE LOGGER UTILITY
+# Using the logger utility for handling log setting and creation
+loggerSet = LoggingSetter(__name__)
+
+# All logs will be saved at utilities folder
+logger = loggerSet.setting_log('utilities/main.log')
 
 
 class DataRetriever:
@@ -39,6 +48,7 @@ class DataRetriever:
             str: A message indicating the location of the stored data.
         """
         # Loading data from specific URL
+        logger.debug("Reading datafile")
         data = pd.read_csv(self.url)
 
         # Uncovering missing data
@@ -63,8 +73,47 @@ class DataRetriever:
         # Save data to CSV file
         data.to_csv(self.DATASETS_DIR + self.RETRIEVED_DATA, index=False)
 
+        logger.debug(f'Data stored in {self.DATASETS_DIR + self.RETRIEVED_DATA}')
+
         return f'Data stored in {self.DATASETS_DIR + self.RETRIEVED_DATA}'
 
+    def retrieve_data_Gdrive(self, gdrive_url):
+        """
+        Retrieves data from the specified URL, processes it, and stores it in a CSV file.
+
+        Returns:
+            str: A message indicating the location of the stored data.
+        """
+        # Loading data from specific URL
+        logger.debug("Using requests to download data")
+        download_link = gdrive_url
+        output_name = "data/onlinefraudb.csv"
+        response = requests.get(url=download_link)
+        with open(output_name, 'wb') as f:
+            f.write(response.content)
+
+        data = pd.read_csv(output_name)
+
+        logger.debug("Data downloaded")
+
+        data = pd.read_csv(output_name)
+
+        # Drop irrelevant columns
+        data.drop(self.DROP_COLS, axis=1, inplace=True)
+
+        # Create directory if it does not exist
+        if not os.path.exists(self.DATASETS_DIR):
+            os.makedirs(self.DATASETS_DIR)
+            print(f"Directory '{self.DATASETS_DIR}' created successfully.")
+        else:
+            print(f"Directory '{self.DATASETS_DIR}' already exists.")
+
+        # Save data to CSV file
+        data.to_csv(self.DATASETS_DIR + self.RETRIEVED_DATA, index=False)
+
+        logger.debug(f'Data stored in {self.DATASETS_DIR + self.RETRIEVED_DATA}')
+
+        return f'Data stored in {self.DATASETS_DIR + self.RETRIEVED_DATA}'
 # Usage Example:
 # URL = 'https://www.openml.org/data/get_csv/16826755/phpMYEkMl'
 # data_retriever = DataRetriever(URL)
