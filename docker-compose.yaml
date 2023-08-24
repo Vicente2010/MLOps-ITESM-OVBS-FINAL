@@ -1,0 +1,26 @@
+version: "3.10"
+
+services:
+  api:
+    build: ./
+    image: myimage
+    command: uvicorn api:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    ports:
+      - 8000:8000
+    networks:
+      - test_network
+
+#  frontend:
+#    build: frontend
+#    ports:
+#      - 3000:3000
+#    networks:
+#      AIservice:
+#        aliases:
+#          - frontend.docker
+#    depends_on:
+#      - app
+
+networks:
+  test_network:
+    driver: bridge
