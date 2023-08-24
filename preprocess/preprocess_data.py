@@ -3,6 +3,14 @@ from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 import re
 import numpy as np
+from utilities.logging_util import LoggingSetter
+
+# SETTING THE LOGGER UTILITY
+# Using the logger utility for handling log setting and creation
+loggerSet = LoggingSetter(__name__)
+
+# All logs will be saved at utilities folder
+logger = loggerSet.setting_log('utilities/main.log')
 
 
 class MissingIndicator(BaseEstimator, TransformerMixin):
@@ -457,6 +465,7 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
             self (OneHotEncoder): The transformer instance.
         """
         self.dummies = pd.get_dummies(X[self.variables], drop_first=True).columns
+        logger.debug(f"Getting dummy columns for categorical variables: {self.variables}")
         return self
 
     def transform(self, X):
@@ -548,6 +557,7 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
         Returns:
             X_selected (pd.DataFrame): DataFrame containing only the specified features (columns).
         """
+        logger.debug(f"Executing feature selector with variables : {self.feature_names}")
         return X[self.feature_names]
 
 
