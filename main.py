@@ -6,7 +6,7 @@ import joblib
 from train.train_data import OnlineFraudPipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
-from fastapi import FastAPI
+# from fastapi import FastAPI
 # Body,
 # Path,
 # Query,
@@ -103,71 +103,3 @@ X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux)
 print(X_test)
 prediction_result = predictor.predict(X_test)
 logger.debug(f'Prediction for fraud:  {prediction_result} ')
-
-# API code
-
-app = FastAPI()
-
-"""
-PARAMETER VALUES
-Values are required after de endpoint.
-"""
-
-
-@app.get('/', status_code=200)
-async def healthcheck():
-    return 'Online Fraud Predictor is all ready to go!'
-
-
-@app.get("/predict/")
-async def predict(v_type: str = "CASH_OUT", v_amount: float = 1.0, v_oldbalanceOrig: float = 1.0, v_newbalanceOrig: float = 1.0):
-    """
-    Makes a prediction of fraud or not fraud given the transaction characteristics
-
-    This endpoint calculates a prediction of fraud given four variables of a transaction and returns the result.
-
-    Parameters:
-    - **type**: The first float value. (Default: 1.0)
-    - **amoun**: The second float value. (Default: 2.0)
-
-    Responses:
-    - **200 OK**: The subtraction was calculated successfully.
-        - Response JSON:
-            ```
-            {
-                "resultado": srt (subtraction of v1 and v2)
-            }
-            ```
-    - **422 Unprocessable Entity**: Validation error.
-        - Response JSON:
-            ```
-            {
-                "detail": [
-                    {
-                        "loc": ["query", "v1"],
-                        "msg": "value is not a valid float",
-                        "type": "type_error.float"
-                    },
-                    {
-                        "loc": ["query", "v2"],
-                        "msg": "value is not a valid float",
-                        "type": "type_error.float"
-                    }
-                ]
-            }
-            ```
-    """
-
-    # initialize list of lists
-    # data_aux = [['type', v_type], ['amount', v_amount], ['oldbalanceOrg', v_oldbalanceOrig], ['newbalanceOrg', v_newbalanceOrig]]
-    data_aux = {'type': [v_type],
-                'amount': [v_amount],
-                'oldbalanceOrg': [v_oldbalanceOrig],
-                'newbalanceOrig': [v_newbalanceOrig]}
-
-    X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux))
-
-    result = str(logistic_regression_model.predict(X_test))
-    print(f"'resultado': {result}")
-    print(f"'resultado': {result}")
-    return {"resultado": result}
