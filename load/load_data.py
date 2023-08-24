@@ -1,6 +1,6 @@
 import pandas as pd
-import numpy as np
-import re
+# import numpy as np
+# import re
 import os
 
 
@@ -30,43 +30,6 @@ class DataRetriever:
     def __init__(self, url, data_path):
         self.url = url
         self.DATASETS_DIR = data_path
-
-    def _get_first_cabin(self, row):
-        """
-        Helper function to extract the first cabin from a row.
-
-        Parameters:
-            row (str): The row containing cabin information.
-
-        Returns:
-            str: The first cabin from the row, or np.nan if not found.
-        """
-        try:
-            return row.split()[0]
-        except Exception:
-            return np.nan
-
-    def _get_title(self, passenger):
-        """
-        Helper function to extract the title from a passenger's name.
-
-        Parameters:
-            passenger (str): The name of the passenger.
-
-        Returns:
-            str: The title extracted from the passenger's name.
-        """
-        line = passenger
-        if re.search('Mrs', line):
-            return 'Mrs'
-        elif re.search('Mr', line):
-            return 'Mr'
-        elif re.search('Miss', line):
-            return 'Miss'
-        elif re.search('Master', line):
-            return 'Master'
-        else:
-            return 'Other'
 
     def retrieve_data(self):
         """
