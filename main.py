@@ -6,7 +6,22 @@ import joblib
 from train.train_data import OnlineFraudPipeline
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
+from fastapi import FastAPI
+# Body,
+# Path,
+# Query,
+# HTTPException,
+# status
+
+from utilities.logging_util import LoggingSetter
 # import os
+
+# SETTING THE LOGGER UTILITY
+# Using the logger utility for handling log setting and creation
+loggerSet = LoggingSetter(__name__)
+
+# All logs will be saved at utilities folder
+logger = loggerSet.setting_log('utilities/main.log')
 
 # Constants for the load process
 # The file is too big, in this version we use a local path instead of an URL
@@ -31,13 +46,16 @@ PIPELINE_SAVE_FILE = f'{PIPELINE_NAME}_output.pkl'
 # Retrieve data
 data_retriever = DataRetriever(FILE_PATH, DATASETS_DIR)
 result = data_retriever.retrieve_data()
-print(result)
+logger.info(f"Result of DataRetriever.data_retreiver:  {result}")
+# print(result)
 
 # Read data
 data = pd.read_csv(DATASETS_DIR + RETRIEVED_DATA)
-print(data.head())
 
-# Instantiate the TitanicDataPipeline class
+# Cambiar el logging por logger
+logger.info(f"Data head: \n {data.head()}")
+
+# Instantiate the Pipeline class
 onlinefraud_data_pipeline = OnlineFraudPipeline(seed_model=SEED_MODEL,
                                                 categorical_vars=CATEGORICAL_VARS,
                                                 selected_features=SELECTED_FEATURES)
@@ -69,3 +87,81 @@ print(conf_mx)
 save_path = TRAINED_MODEL_DIR + PIPELINE_SAVE_FILE
 joblib.dump(logistic_regression_model, save_path)
 print(f"Model saved in {save_path}")
+
+# API predict test
+data_aux = {'type': ['CASH_OUT'],
+            'amount': [1000],
+            'oldbalanceOrg': [1000],
+            'newbalanceOrig': [0]}
+print(data_aux)
+X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux))
+print(X_test)
+print(logistic_regression_model.predict(X_test))
+
+# API code
+
+app = FastAPI()
+
+"""
+PARAMETER VALUES
+Values are required after de endpoint.
+"""
+
+
+@app.get('/', status_code=200)
+async def healthcheck():
+    return 'Online Fraud Predictor is all ready to go!'
+
+
+@app.get("/predict/")
+async def predict(v_type: str = "CASH_OUT", v_amount: float = 1.0, v_oldbalanceOrig: float = 1.0, v_newbalanceOrig: float = 1.0):
+    """
+    Makes a prediction of fraud or not fraud given the transaction characteristics
+
+    This endpoint calculates a prediction of fraud given four variables of a transaction and returns the result.
+
+    Parameters:
+    - **type**: The first float value. (Default: 1.0)
+    - **amoun**: The second float value. (Default: 2.0)
+
+    Responses:
+    - **200 OK**: The subtraction was calculated successfully.
+        - Response JSON:
+            ```
+            {
+                "resultado": srt (subtraction of v1 and v2)
+            }
+            ```
+    - **422 Unprocessable Entity**: Validation error.
+        - Response JSON:
+            ```
+            {
+                "detail": [
+                    {
+                        "loc": ["query", "v1"],
+                        "msg": "value is not a valid float",
+                        "type": "type_error.float"
+                    },
+                    {
+                        "loc": ["query", "v2"],
+                        "msg": "value is not a valid float",
+                        "type": "type_error.float"
+                    }
+                ]
+            }
+            ```
+    """
+
+    # initialize list of lists
+    # data_aux = [['type', v_type], ['amount', v_amount], ['oldbalanceOrg', v_oldbalanceOrig], ['newbalanceOrg', v_newbalanceOrig]]
+    data_aux = {'type': [v_type],
+                'amount': [v_amount],
+                'oldbalanceOrg': [v_oldbalanceOrig],
+                'newbalanceOrig': [v_newbalanceOrig]}
+
+    X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux))
+
+    result = str(logistic_regression_model.predict(X_test))
+    print(f"'resultado': {result}")
+    print(f"'resultado': {result}")
+    return {"resultado": result}
