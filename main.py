@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 # status
 # import os
 from utilities.logging_util import LoggingSetter
-from predictor.predict import ModelPredictor
+# from predictor.predict import ModelPredictor
 
 # SETTING THE LOGGER UTILITY
 # Using the logger utility for handling log setting and creation
@@ -34,6 +34,7 @@ RETRIEVED_DATA = 'retrieved_data.csv'
 # Constants/Parameters for the train process
 SEED_MODEL = 404
 SELECTED_FEATURES = ['amount', 'oldbalanceOrg', 'newbalanceOrig']
+SELECTED_FEATURES_DT = ['amount', 'oldbalanceOrg', 'newbalanceOrig']
 CATEGORICAL_VARS = ['type']
 TARGET = 'isFraud'
 TEST_SPLIT = 0.25
@@ -41,7 +42,9 @@ TEST_SPLIT = 0.25
 # Constants for the models export process
 TRAINED_MODEL_DIR = './models/'
 PIPELINE_NAME = 'logistic_regression'
+PIPELINE_NAME_DT = 'decision_tree'
 PIPELINE_SAVE_FILE = f'{PIPELINE_NAME}_output.pkl'
+PIPELINE_SAVE_FILE_DT = f'{PIPELINE_NAME_DT}_output.pkl'
 
 
 # Retrieve data
@@ -62,7 +65,8 @@ logger.debug(f"Data head: \n {data.head()}")
 logger.debug("Calling OnlineFraudPipeline Class")
 onlinefraud_data_pipeline = OnlineFraudPipeline(seed_model=SEED_MODEL,
                                                 categorical_vars=CATEGORICAL_VARS,
-                                                selected_features=SELECTED_FEATURES)
+                                                selected_features=SELECTED_FEATURES,
+                                                selected_features_dt=SELECTED_FEATURES_DT)
 
 
 # Split data into sets for training and testing
@@ -71,15 +75,15 @@ X_train, X_test, y_train, y_test = train_test_split(data.drop(TARGET, axis=1),
                                                     test_size=TEST_SPLIT,
                                                     random_state=SEED_MODEL)
 
-
+# Training/Fitting Logistic Regresion
 logistic_regression_model = onlinefraud_data_pipeline.fit_logistic_regression(X_train, y_train)
 
-X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(X_test)
-y_pred = logistic_regression_model.predict(X_test)
+X_test_T = onlinefraud_data_pipeline.PIPELINE.fit_transform(X_test)
+y_pred = logistic_regression_model.predict(X_test_T)
 
-# Making predictions and measuring performance-
-class_pred = logistic_regression_model.predict(X_test)
-proba_pred = logistic_regression_model.predict_proba(X_test)[:, 1]
+# Making predictions and measuring performance
+class_pred = logistic_regression_model.predict(X_test_T)
+proba_pred = logistic_regression_model.predict_proba(X_test_T)[:, 1]
 logger.debug(f'test roc-auc : {roc_auc_score(y_test, proba_pred)}')
 logger.debug(f'test accuracy: {accuracy_score(y_test, class_pred)}')
 
@@ -92,14 +96,34 @@ save_path = TRAINED_MODEL_DIR + PIPELINE_SAVE_FILE
 joblib.dump(logistic_regression_model, save_path)
 logger.debug(f"Model saved in {save_path}")
 
+# Training/Fitting Decision Tree
+decision_tree_model = onlinefraud_data_pipeline.fit_decision_tree(X_train, y_train)
+
+X_test_T = onlinefraud_data_pipeline.PIPELINE_DT.fit_transform(X_test)
+y_pred = decision_tree_model.predict(X_test_T)
+
+# Making predictions and measuring performance
+class_pred = decision_tree_model.predict(X_test_T)
+proba_pred = decision_tree_model.predict_proba(X_test_T)[:, 1]
+logger.debug(f'test roc-auc : {roc_auc_score(y_test, proba_pred)}')
+logger.debug(f'test accuracy: {accuracy_score(y_test, class_pred)}')
+
+# Displaying confusion matrix
+conf_mx = confusion_matrix(y_test, y_pred, labels=decision_tree_model.classes_)
+logger.debug(f"Confusion matrix: \n {conf_mx}")
+
+# Save the model using joblib
+save_path = TRAINED_MODEL_DIR + PIPELINE_SAVE_FILE_DT
+joblib.dump(decision_tree_model, save_path)
+logger.debug(f"Model saved in {save_path}")
+
 # API predict test
-data_aux = {'type': ['CASH_OUT'],
-            'amount': [1000],
-            'oldbalanceOrg': [1000],
-            'newbalanceOrig': [0]}
-logger.debug(f'Data for prediction:  {data_aux} ')
-predictor = ModelPredictor("./models/logistic_regression_output.pkl")
-X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux))
-print(X_test)
-prediction_result = predictor.predict(X_test)
-logger.debug(f'Prediction for fraud:  {prediction_result} ')
+# data_aux = {'amount': [1000],
+#            'oldbalanceOrg': [1000],
+#            'newbalanceOrig': [0]}
+# logger.debug(f'Data for prediction:  {data_aux} ')
+# predictor = ModelPredictor("./models/logistic_regression_output.pkl")
+# X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux))
+# print(X_test)
+# prediction_result = predictor.predict(X_test)
+# logger.debug(f'Prediction for fraud:  {prediction_result} ')
