@@ -1,7 +1,7 @@
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
-# from sklearn.compose import ColumnTransformer
+from sklearn.tree import DecisionTreeClassifier
 from preprocess.preprocess_data import (
     OneHotEncoder,
     FeatureSelector,
@@ -31,13 +31,14 @@ class OnlineFraudPipeline:
         create_pipeline(): Create and return the Titanic data processing pipeline.
     """
 
-    def __init__(self, seed_model, categorical_vars, selected_features):
+    def __init__(self, seed_model, categorical_vars, selected_features, selected_features_dt):
         self.SEED_MODEL = seed_model
         # self.NUMERICAL_VARS = numerical_vars
         # self.CATEGORICAL_VARS_WITH_NA = categorical_vars_with_na
         # self.NUMERICAL_VARS_WITH_NA = numerical_vars_with_na
         self.CATEGORICAL_VARS = categorical_vars
         self.SELECTED_FEATURES = selected_features
+        self.SELECTED_FEATURES_DT = selected_features_dt
 
     def create_pipeline(self):
         """
@@ -86,3 +87,32 @@ class OnlineFraudPipeline:
         """
         pipeline = self.create_pipeline()
         return pipeline.transform(X_test)
+
+    def fit_decision_tree(self, X_train, y_train):
+        """
+        Fit a Decision Tree model using the predefined data preprocessing pipeline.
+
+        Parameters:
+        - X_train (pandas.DataFrame or numpy.ndarray): The training input data.
+        - y_train (pandas.Series or numpy.ndarray): The target values for training.
+
+        Returns:
+        - logistic_regression_model (LogisticRegression): The fitted Logistic Regression model.
+        """
+        decisionTree = DecisionTreeClassifier()
+        pipeline_dt = self.create_DTpipeline()
+        pipeline_dt.fit(X_train, y_train)
+        decisionTree.fit(pipeline_dt.transform(X_train), y_train)
+        logger.debug("Training Decision Tree")
+        return decisionTree
+
+    def create_DTpipeline(self):
+        """
+        Create and return the Online Fraud data processing pipeline for DecisionTree.
+
+        Returns:
+            Pipeline: A scikit-learn pipeline for data processing and modeling.
+        """
+        self.PIPELINE_DT = Pipeline([('feature_selector', FeatureSelector(self.SELECTED_FEATURES_DT)),])
+        logger.debug(f"Creating DecisionTree Pipeline, Selected Features: {self.SELECTED_FEATURES_DT}")
+        return self.PIPELINE_DT
