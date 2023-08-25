@@ -44,6 +44,27 @@ def test_csv_file_existence():
         f"The CSV file at '{csv_file_path}' does not exist."
 
 
+def test_model_existence():
+    """
+    Test to validate the existence of a .pkl model file.
+
+    This test function checks whether the specified .pkl model file exists
+    in the specified directory.
+
+    Raises:
+        AssertionError: If the model file doesn't exist.
+
+    Usage:
+        Run this test using the pytest command:
+        pytest test_model_existence.py
+    """
+    model_filename = "logistic_regression_output.pkl"
+    MODEL_DIRECTORY = "models"
+    model_path = os.path.join(MODEL_DIRECTORY, model_filename)
+    print(model_path)
+    assert os.path.exists(model_path), f"Model file '{model_filename}' does not exist."
+
+
 if __name__ == "__main__":
     # Run the test function using Pytest
     pytest.main([__file__])
