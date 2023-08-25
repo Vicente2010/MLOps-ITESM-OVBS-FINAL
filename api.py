@@ -3,6 +3,8 @@ from utilities.logging_util import LoggingSetter
 from predictor.predict import ModelPredictor
 from main import onlinefraud_data_pipeline
 import pandas as pd
+from starlette.responses import JSONResponse
+from models.models import OnlineFraud
 
 # SETTING THE LOGGER UTILITY
 # Using the logger utility for handling log setting and creation
@@ -36,34 +38,8 @@ async def predict(v_type: str = "CASH_OUT", v_amount: float = 1.0, v_oldbalanceO
 
     Parameters:
     - **type**: The first float value. (Default: 1.0)
-    - **amoun**: The second float value. (Default: 2.0)
+    - **amount**: The second float value. (Default: 2.0)
 
-    Responses:
-    - **200 OK**: The subtraction was calculated successfully.
-        - Response JSON:
-            ```
-            {
-                "resultado": srt (subtraction of v1 and v2)
-            }
-            ```
-    - **422 Unprocessable Entity**: Validation error.
-        - Response JSON:
-            ```
-            {
-                "detail": [
-                    {
-                        "loc": ["query", "v1"],
-                        "msg": "value is not a valid float",
-                        "type": "type_error.float"
-                    },
-                    {
-                        "loc": ["query", "v2"],
-                        "msg": "value is not a valid float",
-                        "type": "type_error.float"
-                    }
-                ]
-            }
-            ```
     """
 
     # initialize list of lists
@@ -80,3 +56,50 @@ async def predict(v_type: str = "CASH_OUT", v_amount: float = 1.0, v_oldbalanceO
     print(f"'Prediction for online fraud': {result}")
     logger.debug(f"'Prediction for online fraud': {result}")
     return {"Prediction for online fraud": result}
+
+
+@app.post("/predict_fraud/")
+def predict_fraud(onlinefraud_features: OnlineFraud) -> JSONResponse:
+    predictor = ModelPredictor("./models/logistic_regression_output.pkl")
+    X = [onlinefraud_features.type,
+         onlinefraud_features.amount,
+         onlinefraud_features.oldbalanceOrg,
+         onlinefraud_features.newbalanceOrig]
+
+    logger.debug(f"Input values: {[X]} , X Type: {type([X])} ")
+
+    data_aux = {'type': onlinefraud_features.type,
+                'amount': onlinefraud_features.amount,
+                'oldbalanceOrg': onlinefraud_features.oldbalanceOrg,
+                'newbalanceOrig': onlinefraud_features.newbalanceOrig}
+
+    logger.debug(f"Input values: {print(data_aux)}")
+
+    X_test = onlinefraud_data_pipeline.PIPELINE.fit_transform(pd.DataFrame(data_aux, index=[0]))
+    prediction = predictor.predict(X_test)
+
+    logger.debug(f"Prediction for online fraud: {prediction}")
+    return JSONResponse(f"Prediction for online fraud: {prediction}")
+
+
+@app.post("/predict_fraud_dt/")
+def predict_fraud_dt(onlinefraud_features: OnlineFraud) -> JSONResponse:
+    predictor = ModelPredictor("./models/decision_tree_output.pkl")
+    X = [onlinefraud_features.type,
+         onlinefraud_features.amount,
+         onlinefraud_features.oldbalanceOrg,
+         onlinefraud_features.newbalanceOrig]
+
+    logger.debug(f"Input values: {[X]} , X Type: {type([X])} ")
+
+    data_aux = {'amount': onlinefraud_features.amount,
+                'oldbalanceOrg': onlinefraud_features.oldbalanceOrg,
+                'newbalanceOrig': onlinefraud_features.newbalanceOrig}
+
+    logger.debug(f"Input values: {print(data_aux)}")
+
+    X_test = onlinefraud_data_pipeline.PIPELINE_DT.fit_transform(pd.DataFrame(data_aux, index=[0]))
+    prediction = predictor.predict(X_test)
+
+    logger.debug(f"Prediction for online fraud: {prediction}")
+    return JSONResponse(f"Prediction for online fraud: {prediction}")
