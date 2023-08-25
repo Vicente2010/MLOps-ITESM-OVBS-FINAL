@@ -71,7 +71,14 @@ pip install -r requirements.txt
 
 The main file named *main.py* has all the functions needed to solve the objective. 
 
-This file uses funcions from the modules in the project folders.
+This file uses functions from the modules. It loads the dataset, executes the pipeline, trains two models (logistic regression and Decision Tree) saves the models in the Models folder.
+
+It's recommended to run this file before to download the dataset and generate the models that are used in the rest of the project. Either way, this version of the project includes the dataset files and the .pkl files in case you don't want to run this file.
+
+To execute the main file run the following code in your root
+```
+python.exe main.py
+```
 
 ## Load Module
 
@@ -79,33 +86,44 @@ This module keeps the processes to import the dataset.
 
 **NOTE:** The current scope of this project doesn't reach the functionality to download the dataset and store it in the *data* folder because the file is 470MB.
 
-The current functionality of this project is :
- 
-1. Download the dataset from the url from the https://www.kaggle.com/datasets/jainilcoder/online-payment-fraud-detection
+This new version has a URL to a balanced sample of the original dataset.
 
-1. Copy you local path to the dataset in the variable **FILE_PATH** in the *main.py* file
-
-1. After using the load functionality in the *main.py* file , delete the dataset from the data folder in order to avoid commiting with file in the project. This project can't handle large files.
+I had to make it this way to work properly in Docker
 
 ## Preprocess
 
 This module keeps the transformations done to the dataset.
 
-## Train 
+## Train
 
-This module holds the Pipeline to preprocess the dataset and the models methods that are going to be trained with the data.
+This module holds the Pipeline to preprocess the dataset and the model methods that are going to be trained with the data.
 
-## Models 
+## Models
 
-The main file export the trained model in this file to keep the results.
+The main file exports the trained model in this file to keep the results.
 
 ## Test
 
-This module holds test to validate the functionalities in the other modules.
+This module holds tests to validate the functionalities in the other modules.
 
 It has its own ReadMe
 
 ## Notebook
 
 This folder keeps the original notebook
+
+## Utilities + Logs
+
+This folder contains a module for generating logs easily in every other module.
+
+**IMPORTANT:** The main.py file and api.py file share a log file and this log is stored in this folder with the name **main.log**.
+
+# API.PY
+
+This file generates an API to generate predictions for fraud using the models that the main file generates.
+
+To execute this file alone use the following code:
+```
+uvicorn main:app --reload
+```
 
