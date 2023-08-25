@@ -122,8 +122,93 @@ This folder contains a module for generating logs easily in every other module.
 
 This file generates an API to generate predictions for fraud using the models that the main file generates.
 
-To execute this file alone use the following code:
+To execute this file alone use the following code: (from the root where the docker-compose.yaml is located )
 ```
-uvicorn main:app --reload
+uvicorn api:app --reload
 ```
 
+# FrontEnd
+
+This folder contains the frontend_main.py file that generates the API for consulting the API predict function
+
+To execute this file alone use the following code: (from the root where the docker-compose.yaml is located )
+```
+uvicorn frontend.frontend_main:app --reload
+```
+
+# Docker
+
+This project includes a Dockerfile at the root directory to create the container for the app at the api.py file . Also includes another Dockerfiler at the frontend to create the container for the app at the frontend_main.py file
+
+There is also a docker-compose file to handle the containers and the network between both containers.
+
+Before building the images and containers create the network declared at the docker-compose.yaml using the following code
+```
+docker network create AIservice
+```
+
+To create both images and containers execute the following command
+```
+docker-compose up --build
+```
+
+After that, you should see two containers on your Docker Desktop like in the following image:
+
+![Docker](./images/1_DockerView.png)
+
+Please select the 3000 port to execute the FrontEnd API to check its functionalities.
+
+# Using the FrontEnd API
+
+The FrontEnd API makes a request to the API at api.py through the POST method, then the API makes a prediction that returns to the frontend.
+
+At the frontend API select the classify option to test the predictions and the select the try out button.
+
+
+![Docker](./images/2_FrontEnd3000.png)
+
+These are two examples of results in the classify functionality for predicting Online Fraud using a Decision Tree Model
+
+* **Prediction 1**  
+    Request body
+
+    ```bash
+    {
+      "type": "CASH_OUT",
+      "amount": 5000,
+      "oldbalanceOrg": 10000,
+      "newbalanceOrig": 500
+    }
+    ```
+
+    Response body
+    The output will be:
+
+    ```bash
+    "Prediction for online fraud: [0]"
+    ```
+
+    ![Docker](./images/4_FrontEnd_Case0.png)
+
+* **Prediction 1**  
+    Request body
+
+    ```bash
+    {
+      "type": "CASH_OUT",
+      "amount": 1000000,
+      "oldbalanceOrg": 1000000,
+      "newbalanceOrig": 10
+    }
+    ```
+
+    Response body
+    The output will be:
+
+    ```bash
+    "Prediction for online fraud: [1]"
+    ```
+
+    ![Docker](./images/3_FrontEnd_Case1.png)
+
+# Obtaining the logs in the docker containers
