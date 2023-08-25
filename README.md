@@ -212,3 +212,44 @@ These are two examples of results in the classify functionality for predicting O
     ![Docker](./images/3_FrontEnd_Case1.png)
 
 # Obtaining the logs in the docker containers
+
+Use the following commands to obtaind the logs from the docker containers.
+
+It is important to execute these commands in the folder where the docker-compose file is located.
+
+```
+docker ps -a
+docker cp proyectomlops_v2-api-1:/utilities/main.log .
+docker cp proyectomlops_v2-frontend-1:/frontend.log .
+
+```
+
+Here are some images to help you understand these commands
+
+![Docker](./images/logconsole.png)
+
+
+![Docker](./images/logpreview.png)
+
+
+# TEST Instructions 
+
+This is the documentation to perform tests on this project's fuctionalities
+
+## Testing whether the dataset path contains the dataset 
+
+The following command tests the load functionality that works in load module
+
+```
+pytest .\test\test_file.py::test_csv_file_existence
+```
+
+Remember that after executing the test to delete the dataset from the data folder to not commit the project with a large file
+
+## Testing the existance of the model
+
+The following command test the existance of the logistic regresion pkl file
+
+```
+pytest .\test\test_file.py::test_model_existence
+```

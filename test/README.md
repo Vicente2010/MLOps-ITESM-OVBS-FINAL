@@ -12,3 +12,11 @@ pytest .\test\test_file.py::test_csv_file_existence
 
 Remember that after executing the test to delete the dataset from the data folder
 in order to not commit the project with a large file
+
+## Testing the existance of the model
+
+The following command test the existance of the logistic regresion pkl file
+
+```
+pytest .\test\test_file.py::test_model_existence
+```
